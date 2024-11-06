@@ -1,101 +1,119 @@
-import Image from "next/image";
+'use client';
+
+import { Card } from '@/components/Card/Card';
+import { FixButton } from '@/components/FixButton/FixButton';
+import { useRandomWord } from '@/hooks/useRandomWord';
+import { allCategories } from '@/types/Category';
+import { useCallback, useEffect, useState } from 'react';
+
+type CardState = {
+  word: string;
+  isFixed: boolean;
+  key: string; // キーを追加
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { words, isLoading, fetchRandomWords } = useRandomWord();
+  const [leftCard, setLeftCard] = useState<CardState>({
+    word: words[0],
+    isFixed: false,
+    key: 'left-' + Date.now(), // ユニークなキーを生成
+  });
+  const [rightCard, setRightCard] = useState<CardState>({
+    word: words[1],
+    isFixed: false,
+    key: 'right-' + Date.now(), // ユニークなキーを生成
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const reGenerateWord = useCallback(() => {
+    if (leftCard.isFixed && rightCard.isFixed) {
+      return;
+    }
+    fetchRandomWords(allCategories);
+  }, [leftCard.isFixed, rightCard.isFixed, fetchRandomWords]);
+
+  useEffect(() => {
+    if (!leftCard.isFixed)
+      setLeftCard({
+        word: words[0],
+        isFixed: false,
+        key: 'left-' + Date.now(),
+      });
+    if (!rightCard.isFixed)
+      setRightCard({
+        word: words[1],
+        isFixed: false,
+        key: 'right-' + Date.now(),
+      });
+  }, [words]);
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex justify-around px-20 py-20 w-4/5">
+        <div className="flex flex-col items-center gap-y-6">
+          <Card
+            word={leftCard.word}
+            isLoading={isLoading && !leftCard.isFixed}
+            key={leftCard.key}
+            onChangeWordValue={(e) => {
+              setLeftCard({
+                word: e.target.value,
+                isFixed: true,
+                key: leftCard.key,
+              });
+            }}
+          />
+          <FixButton
+            isChecked={leftCard.isFixed}
+            onClick={(isChecked) => {
+              setLeftCard({ ...leftCard, isFixed: isChecked });
+            }}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        <div className="flex flex-col items-center gap-y-6">
+          <Card
+            word={rightCard.word}
+            isLoading={isLoading && !rightCard.isFixed}
+            key={rightCard.key}
+            onChangeWordValue={(e) => {
+              setRightCard({
+                word: e.target.value,
+                isFixed: true,
+                key: rightCard.key,
+              });
+            }}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+          <FixButton
+            isChecked={rightCard.isFixed}
+            onClick={(isChecked) => {
+              setRightCard({ ...rightCard, isFixed: isChecked });
+            }}
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center" aria-label="読み込み中">
+          <div className="animate-ping h-2 w-2 bg-blue-600 rounded-full"></div>
+          <div className="animate-ping h-2 w-2 bg-blue-600 rounded-full mx-4"></div>
+          <div className="animate-ping h-2 w-2 bg-blue-600 rounded-full"></div>
+        </div>
+      ) : (
+        <button
+          onClick={() => {
+            reGenerateWord();
+          }}
+          disabled={isLoading || (leftCard.isFixed && rightCard.isFixed)}
+          className="bg-[#1D5D9B] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-40 disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <span>
+            {isLoading || (leftCard.isFixed && rightCard.isFixed)
+              ? 'カードが両方固定されています'
+              : '再生成'}
+          </span>
+        </button>
+      )}
     </div>
   );
 }
