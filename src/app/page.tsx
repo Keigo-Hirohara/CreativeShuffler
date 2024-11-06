@@ -105,7 +105,7 @@ export default function Home() {
             reGenerateWord();
           }}
           disabled={isLoading || (leftCard.isFixed && rightCard.isFixed)}
-          className="bg-[#1D5D9B] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-40 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="bg-[#1D5D9B] hover:bg-[#75C2F6] text-white font-bold py-2 px-4 rounded w-40 disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           <span>
             {isLoading || (leftCard.isFixed && rightCard.isFixed)
